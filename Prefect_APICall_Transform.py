@@ -220,13 +220,4 @@ def csv_files_for_streamlit():
     da_of_otherside(df_tp_without_flag,3,"without_flag")
 
 if __name__ == "__main__":
-    csv_files_for_streamlit.from_source(
-        source="https://github.com/unthinkableETH/Otherside-Resource.git",
-        entrypoint="Prefect_APICall_Transform.py:csv_files_for_streamlit",
-
-    ).deploy(
-        name="otherside-elt", 
-        work_pool_name="my-managed-pool", 
-        job_variables={"pip_packages": ["requests","pandas", "prefect","io","numpy","math","re", "prefect-aws","boto3","s3fs","botocore","httpx"],"PREFECT_LOGGING_LEVEL":"DEBUG"},
-        cron="0 * * * *",
-    )
+    csv_files_for_streamlit()
