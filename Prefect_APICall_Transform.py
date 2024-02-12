@@ -210,8 +210,10 @@ def da_of_otherside(df,percent_v,with_or_without):
         aws_credentials=aws_credentials,
         )
     
-@flow(log_prints=True) 
+@flow
 def csv_files_for_streamlit():
+    otherdeed_api=query_api("otherdeed")
+    expanded_api=query_api("expanded")
     da_of_otherside(df_tp_with_flag,1,"with_flag")
     da_of_otherside(df_tp_with_flag,2,"with_flag")
     da_of_otherside(df_tp_with_flag,3,"with_flag")
