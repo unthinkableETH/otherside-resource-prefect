@@ -1,0 +1,13 @@
+requests
+pandas
+prefect
+io
+numpy
+math
+re
+prefect-aws
+boto3
+s3fs
+botocore
+
+
