@@ -76,7 +76,7 @@ def complete():
     df_tp_without_flag_original=df_tp_with_flag[df_tp_with_flag["PlotID"].isin(final_flag_list) == False]
     df_tp_without_flag=df_tp_without_flag_original.copy(deep=True)
     df_tp_without_flag["PlotID"]=df_tp_without_flag['PlotID'].astype(int)
-    print("without flag"
+    print("without flag")
     pprint(df_tp_without_flag)
 
     #these lines of code access public aws s3 buckets that i created that are used in the next function
