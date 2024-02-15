@@ -211,3 +211,6 @@ def complete():
 @flow  
 def csv_files_for_streamlit():
     complete()
+
+if __name__ == "__main__":
+    csv_files_for_streamlit()
