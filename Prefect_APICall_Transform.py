@@ -63,8 +63,6 @@ def complete():
     df_tp_with_flag_original=pd.merge(otherdeed_price_df,expanded_price_df, how="outer")
     df_tp_with_flag=df_tp_with_flag_original.copy(deep=True)
     df_tp_with_flag["PlotID"]=df_tp_with_flag['PlotID'].astype(int)
-    print("with flag")
-    print( df_tp_with_flag)
     #some of the flagged nfts are not really flagged but rather they were label as such because the originals got sent to the burn address
     #these next few lines checks if the originals are in the price for the expanded collection, meaning the original nft has been burned
     #these original nfts are removed from the original flag lisit, then the two lists are combined
@@ -72,13 +70,8 @@ def complete():
     burn_list=list(nfts_that_likely_just_burned["PlotID"])
     new_otherdeed_flag_list=list(set(otherdeed_flag_list).difference(burn_list))
     final_flag_list=new_otherdeed_flag_list+expanded_flag_list
-    print("final list flagged")
-    print(final_flag_list)
     flag_list_int= [int(x) for x in final_flag_list]
-    print(flag_list_int)
     df_tp_without_flag_original=df_tp_with_flag[df_tp_with_flag["PlotID"].isin(flag_list_int) == False]
-    print("df_tp_without_flag_original")
-    print(df_tp_without_flag_original)
     df_tp_without_flag=df_tp_without_flag_original.copy(deep=True)
     df_tp_without_flag["PlotID"]=df_tp_without_flag['PlotID'].astype(int)
     #print("without flag")
