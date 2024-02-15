@@ -12,21 +12,21 @@ import re
 
 
 
-
+#Complete Flow Function
 def complete():
+    #Reservoir is the API for price and flag data, this secret block hides the api, a feature of Prefect
     secret_block = Secret.load("reservoir-api")
-
     # Access the stored secret
     api_key_reservoir=secret_block.get()
-
     headers = {"x-api-key": api_key_reservoir}
 
-
+    #This function queries reservoir by building api link
     def query_api(otherdeed_or_expanded):
         base_url="https://api.reservoir.tools/tokens/"
         price_base_url="floor/v1?collection="
         flag_base_url="ids/v1?collection="
         flag_end_url="&flagStatus=1&limit=10000"
+        #There is currently two otherdeed colletions, the orginal and the expanded, you burn the orginal to get expanded
         otherdeed_c="0x34d85c9CDeB23FA97cb08333b511ac86E1C4E258"
         expanded_c="0x790B2cF29Ed4F310bf7641f013C65D4560d28371"
         def get_price(url):
@@ -35,39 +35,37 @@ def complete():
             data_token=data_price["tokens"]
             price_df=pd.DataFrame(data_token.items(), columns = ["PlotID","LowestPrice"])
             return(price_df)
-
         def get_flag(url):
             response_flag=requests.get(url, headers=headers)
             data_flag=response_flag.json()
             flag_list=data_flag["tokens"]
             return(flag_list)
-
         if otherdeed_or_expanded == "otherdeed":
             otherdeed_price_url=base_url+price_base_url+otherdeed_c
             otherdeed_flag_url=base_url+flag_base_url+otherdeed_c+flag_end_url
             price_df_final=get_price(otherdeed_price_url)
             flag_list_final=get_flag(otherdeed_flag_url)
-
         if otherdeed_or_expanded == "expanded":
             expanded_price_url=base_url+price_base_url+expanded_c
             expanded_flag_url=base_url+flag_base_url+expanded_c+flag_end_url
             price_df_final=get_price(expanded_price_url)
             flag_list_final=get_flag(expanded_flag_url)
-        
         return(price_df_final,flag_list_final)
-
+    #Pull data for the two collections
     otherdeed_api=query_api("otherdeed")
     expanded_api=query_api("expanded")
-
+    #Seperate the price data vs the flag data
     otherdeed_price_df=otherdeed_api[0]
     otherdeed_flag_list=otherdeed_api[1]
     expanded_price_df=expanded_api[0]
     expanded_flag_list=expanded_api[1]
-
+    #merge price data
     df_tp_with_flag_original=pd.merge(otherdeed_price_df,expanded_price_df, how="outer")
     df_tp_with_flag=df_tp_with_flag_original.copy(deep=True)
     df_tp_with_flag["PlotID"]=df_tp_with_flag['PlotID'].astype(int)
-
+    #some of the flagged nfts are not really flagged but rather they were label as such because the originals got sent to the burn address
+    #these next few lines checks if the originals are in the price for the expanded collection, meaning the original nft has been burned
+    #these original nfts are removed from the original flag lisit, then the two lists are combined
     nfts_that_likely_just_burned=expanded_price_df[expanded_price_df["PlotID"].isin(otherdeed_flag_list)]
     burn_list=list(nfts_that_likely_just_burned["PlotID"])
     new_otherdeed_flag_list=list(set(otherdeed_flag_list).difference(burn_list))
@@ -76,10 +74,11 @@ def complete():
     df_tp_without_flag=df_tp_without_flag_original.copy(deep=True)
     df_tp_without_flag["PlotID"]=df_tp_without_flag['PlotID'].astype(int)
 
-    df_a=pd.read_csv("s3://otherside-resource/static-files/Amounts.csv") #Gives the amount needed for 1% or 2.5% or 5%% for each Resource
-    df_r=pd.read_csv("s3://otherside-resource/static-files/Resources.csv") #Gives what Resources each plot has
+    #these lines of code access public aws s3 buckets that i created that are used in the next function
+    df_a=pd.read_csv("s3://otherside-resource/static-files/Amounts.csv") #Gives the amount needed for 1% or 25% or 3%% for each Resource
+    df_r=pd.read_csv("s3://otherside-resource/static-files/Resources.csv") #Gives what Resources each plot has, metadata
     df_ur=pd.read_csv("s3://otherside-resource/static-files/UniqueResources.csv") #Short List of Unique Resources and their rarity rank
-    df_ur2=pd.read_csv("s3://otherside-resource/static-files/UniqueResources2.csv") #Short List of Unique Resources and their rarity rank
+    df_ur2=pd.read_csv("s3://otherside-resource/static-files/UniqueResources2.csv") #Short List of Unique Resources and their rarity rank, with addition infor for merge later
     unique_list=df_ur["Resource"].tolist()
     cols=["Northern Resource","Southern Resource","Western Resource","Eastern Resource"]
 
