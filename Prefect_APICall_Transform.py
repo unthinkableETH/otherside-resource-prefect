@@ -210,7 +210,7 @@ def complete():
     da_of_otherside(df_tp_without_flag,2,"without_flag")
     da_of_otherside(df_tp_without_flag,3,"without_flag")
     
-@flow  
+@flow(log_prints=True)
 def csv_files_for_streamlit():
     complete()
 
