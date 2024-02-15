@@ -75,7 +75,7 @@ def complete():
     print("final list flagged")
     print(final_flag_list)
     df_tp_without_flag_original=df_tp_with_flag[df_tp_with_flag["PlotID"].isin(final_flag_list) == False]
-    print("df_tp_without_flag_original)
+    print("df_tp_without_flag_original")
     print(df_tp_without_flag_original)
     df_tp_without_flag=df_tp_without_flag_original.copy(deep=True)
     df_tp_without_flag["PlotID"]=df_tp_without_flag['PlotID'].astype(int)
