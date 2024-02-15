@@ -9,7 +9,6 @@ from io import BytesIO
 import numpy as np
 import math
 import re
-from pprint import pprint 
 
 
 
@@ -65,7 +64,7 @@ def complete():
     df_tp_with_flag=df_tp_with_flag_original.copy(deep=True)
     df_tp_with_flag["PlotID"]=df_tp_with_flag['PlotID'].astype(int)
     print("with flag")
-    pprint( df_tp_with_flag)
+    print( df_tp_with_flag)
     #some of the flagged nfts are not really flagged but rather they were label as such because the originals got sent to the burn address
     #these next few lines checks if the originals are in the price for the expanded collection, meaning the original nft has been burned
     #these original nfts are removed from the original flag lisit, then the two lists are combined
@@ -77,7 +76,7 @@ def complete():
     df_tp_without_flag=df_tp_without_flag_original.copy(deep=True)
     df_tp_without_flag["PlotID"]=df_tp_without_flag['PlotID'].astype(int)
     print("without flag")
-    pprint(df_tp_without_flag)
+    print(df_tp_without_flag)
 
     #these lines of code access public aws s3 buckets that i created that are used in the next function
     df_a=pd.read_csv("s3://otherside-resource/static-files/Amounts.csv") #Gives the amount needed for 1% or 25% or 3%% for each Resource
