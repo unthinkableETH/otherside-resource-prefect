@@ -85,9 +85,6 @@ def complete():
     
     def da_of_otherside(df,percent_v,with_or_without):
         total_dict={}
-        sort_dict={}
-        rounded_dict={}
-        zero_dict={}
         df_merge=pd.merge(df_r,df, on="PlotID",how="inner") #Merges new resource data with price data
         #Runs through Unique Resource list one by one, and makes a new dataframe if that resource is in any of the four slots of the NFT Plot
         #Puts that new dataframe in dictionary, so the result is, a dictionary full of keys of the different resources and
@@ -101,6 +98,7 @@ def complete():
             if total_dict[x].empty:
                 del total_dict[x] #if there is no plots with a particular resource for sale, delete that key/value from the dictionary
                 continue
+        sort_dict={}
         for x in total_dict: 
             sort_dict[x]=total_dict[x].sort_values(by=['LowestPrice'],ignore_index=True) #sort by lowest price
 
@@ -112,7 +110,8 @@ def complete():
             Q1=np.quantile(sort_dict[x]["LowestPrice"],0.25)
             sort_dict[x]["IQRUpper"]=Q3+(1.5*(Q3-Q1))
             sort_dict[x]=sort_dict[x].loc[sort_dict[x]["LowestPrice"]<=sort_dict[x]["IQRUpper"]]
-    
+            
+        rounded_dict={}
         for x in sort_dict:
             total=df_a[df_a['Unique List'].str.contains(x)]
             percent_value=percent_v/100
@@ -138,9 +137,6 @@ def complete():
                 if sum_count <= num_rows: 
                     rounded_dict[x]=roundeddf
         list_empty=[]
-        zero_list=[]
-
-
         for x in rounded_dict:
             totalprice=rounded_dict[x]["LowestPrice"].sum(axis=0)
             totalprice_round=round(totalprice,2)
@@ -152,6 +148,8 @@ def complete():
             list_empty.append(totalprice_dict)
         
         list_sum_df=pd.DataFrame.from_records(list_empty)
+        zero_list=[]
+        zero_dict={}
         for x in unique_list:
             if list_sum_df.shape[0] == 74:
                 zero_dict={"Resource" : "NA"}
