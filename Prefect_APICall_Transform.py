@@ -74,7 +74,9 @@ def complete():
     final_flag_list=new_otherdeed_flag_list+expanded_flag_list
     print("final list flagged")
     print(final_flag_list)
-    df_tp_without_flag_original=df_tp_with_flag[df_tp_with_flag["PlotID"].isin(final_flag_list) == False]
+    flag_list_int= [int(x) for x in final_flag_list]
+    print(flag_list_int)
+    df_tp_without_flag_original=df_tp_with_flag[df_tp_with_flag["PlotID"].isin(flag_list_int) == False]
     print("df_tp_without_flag_original")
     print(df_tp_without_flag_original)
     df_tp_without_flag=df_tp_without_flag_original.copy(deep=True)
