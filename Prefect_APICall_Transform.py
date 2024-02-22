@@ -12,7 +12,6 @@ import re
 
 
 
-#Complete Flow Function
 def complete():
     #Reservoir is the API for price and flag data, this secret block hides the api, a feature of Prefect
     secret_block = Secret.load("reservoir-api")
@@ -35,6 +34,7 @@ def complete():
             data_token=data_price["tokens"]
             price_df=pd.DataFrame(data_token.items(), columns = ["PlotID","LowestPrice"])
             return(price_df)
+        #users have the option to exclude flagged plots so this is the start of creating that list
         def get_flag(url):
             response_flag=requests.get(url, headers=headers)
             data_flag=response_flag.json()
@@ -115,6 +115,8 @@ def complete():
             sort_dict[x]=sort_dict[x].loc[sort_dict[x]["LowestPrice"]<=sort_dict[x]["IQRUpper"]]
             
         rounded_dict={}
+        #this next for loop checks how many many plots are needed for certain percentage of control
+        #included in this is a while loop that makes sure that plots with two of the same resource are not dropped from the last position
         for x in sort_dict:
             total=df_a[df_a['Unique List'].str.contains(x)]
             percent_value=percent_v/100
@@ -140,6 +142,7 @@ def complete():
                 if sum_count <= num_rows: 
                     rounded_dict[x]=roundeddf
         list_empty=[]
+        #this for loop sums the plots for each rresource and makes new dictionary
         for x in rounded_dict:
             totalprice=rounded_dict[x]["LowestPrice"].sum(axis=0)
             totalprice_round=round(totalprice,2)
@@ -149,10 +152,11 @@ def complete():
             df_percent= ' '.join([str(elem) for elem in df_list])
             totalprice_dict={"Resource" : x,"Total Price to Control "+df_percent+"% in ETH" : totalprice_round, "Number of Plots Needed for "+df_percent+"% Control" : rounded_dict[x].shape[0], "Plot IDs for Sale" : plotids}
             list_empty.append(totalprice_dict)
-        
+
         list_sum_df=pd.DataFrame.from_records(list_empty)
         zero_list=[]
         zero_dict={}
+        #makes condition if there is no resources that cant be bought to a certain percentage
         for x in unique_list:
             if list_sum_df.shape[0] == 74:
                 zero_dict={"Resource" : "NA"}
@@ -170,11 +174,11 @@ def complete():
         else:
             zero_df_merge=pd.merge(zero_df,df_ur2, on="Resource", how="inner")
             zero_df_sort=zero_df_merge.sort_values(by=["Rarity"])
-    
+        #string for filename
         zero_df_csv_string=str(str(percent_v)+"%TotalPrice_"+with_or_without+"_zero.csv")
         
         aws_credentials = AwsCredentials.load("aws")
-
+        #gets csv read to be uploaded to s3 bucket
         csv_buffer = BytesIO()
         zero_df_sort.to_csv(csv_buffer, index=False)
         key = s3_upload(
@@ -184,14 +188,15 @@ def complete():
             aws_credentials=aws_credentials,
             )
 
-        
+        #gets next filename ready
         df_column = list_sum_df.columns[1]
         df_list=re.findall('Price to Control (.*)%', df_column)
         df_percent= ' '.join([str(elem) for elem in df_list])
         df_sort=list_sum_df.sort_values(by=['Total Price to Control '+str(percent_v)+'% in ETH'])
         df_sort_rarity=pd.merge(df_sort,df_ur, on='Resource',how='inner')
         final_string=str(str(percent_v)+"%TotalPrice_"+with_or_without+".csv")
-        
+
+        #uploads second file to s3 bucket
         csv_buffer2 = BytesIO()
         df_sort_rarity.to_csv(csv_buffer2, index=False)
         key2 = s3_upload(
@@ -207,7 +212,8 @@ def complete():
     da_of_otherside(df_tp_without_flag,1,"without_flag")
     da_of_otherside(df_tp_without_flag,2,"without_flag")
     da_of_otherside(df_tp_without_flag,3,"without_flag")
-    
+
+#calls everything above to a flow for prefect
 @flow(log_prints=True)
 def csv_files_for_streamlit():
     complete()
