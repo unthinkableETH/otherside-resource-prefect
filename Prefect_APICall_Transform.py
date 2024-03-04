@@ -10,6 +10,7 @@ import numpy as np
 import math
 import re
 import gspread
+import json
 
 
 
@@ -209,7 +210,8 @@ def complete():
         #uploads to google sheets
         secret_block2 = Secret.load("googlesheets")
         googlesheets=secret_block2.get()
-        gc = gspread.service_account_from_dict(googlesheets)
+        googlsheetsjson= json.loads(googlesheets)
+        gc = gspread.service_account_from_dict(googlesheetsjson)
         sht1 = gc.open_by_key('1zSqF_6eVONc54qzkesva8ALSalzvYK5X_7euyKtG49A')
         worksheet = sht1.add_worksheet(title=zero_df_csv_string, rows=76, cols=2)
         worksheet.update([zero_df_sort.columns.values.tolist()] + zero_df_sort.values.tolist())
