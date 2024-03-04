@@ -9,7 +9,7 @@ from io import BytesIO
 import numpy as np
 import math
 import re
-import import gspread
+import gspread
 
 
 
