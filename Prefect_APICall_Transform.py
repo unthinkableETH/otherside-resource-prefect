@@ -9,6 +9,7 @@ from io import BytesIO
 import numpy as np
 import math
 import re
+import import gspread
 
 
 
@@ -205,6 +206,15 @@ def complete():
             data=csv_buffer2.getvalue(),
             aws_credentials=aws_credentials,
         )
+        #uploads to google sheets
+        secret_block2 = Secret.load("googlesheets")
+        googlesheets=secret_block2.get()
+        gc = gspread.service_account_from_dict(googlesheets)
+        sht1 = gc.open_by_key('1zSqF_6eVONc54qzkesva8ALSalzvYK5X_7euyKtG49A')
+        worksheet = sht1.add_worksheet(title=zero_df_csv_string, rows=76, cols=2)
+        worksheet.update([zero_df_sort.columns.values.tolist()] + zero_df_sort.values.tolist())
+        worksheet2 = sht1.add_worksheet(title=final_string, rows=76, cols=4)
+        worksheet2.update([df_sort_rarity.columns.values.tolist()] + df_sort_rarity.values.tolist())
 
     da_of_otherside(df_tp_with_flag,1,"with_flag")
     da_of_otherside(df_tp_with_flag,2,"with_flag")
